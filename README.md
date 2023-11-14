@@ -4,4 +4,4 @@ Based on the Detectability model by van de Par et al. which can be found [here](
 Includes a `Detectability` class to calculate the detectability through the `frame` function.
 
 I've also included a `DetectabilityLoss` class that allows one to use the `Detectability` as a pytorch loss function.
-It currently assumes you always batch your inputs.
+It currently assumes you always batch your inputs along the first dimension.
