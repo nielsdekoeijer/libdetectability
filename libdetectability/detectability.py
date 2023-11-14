@@ -76,20 +76,16 @@ class DetectabilityLoss(tc.nn.Module):
         self.frame_size = self.detectability.frame_size
         self.taps = self.detectability.taps
         self.leff = self.detectability.leff
-        self.g = tc.from_numpy(self.detectability.g)
-        self.h = tc.from_numpy(self.detectability.h)
+        self.G = tc.from_numpy(self.detectability.h) * tc.from_numpy(self.detectability.g).unsqueeze(0)
 
     def _spectrum(self, a):
-        return tc.pow(tc.abs(tc.fft.rfft(a)), 2.0)
-
-    def _masker_power(self, a, i):
-        return tc.sum(self.h * self.g[i] * a)
+        return tc.pow(tc.abs(tc.fft.rfft(a, axis=1)), 2.0)
 
     def _masker_power_array(self, a):
-        return tc.tensor([self._masker_power(a, i) for i in range(self.taps)])
+        return tc.sum(a.unsqueeze(1) * self.G, axis=2)
 
     def _detectability(self, s, m, cs, ca):
-        return cs * self.leff * (s / (m + ca)).sum()
+        return cs * self.leff * (s / (m + ca)).sum(axis=1)
 
     def to(device):
         self.g.to(device)

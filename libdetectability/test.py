@@ -10,7 +10,13 @@ def test_cost():
     y = np.sin(2 * np.pi * np.arange(2048) / 2048)
 
     npv = npd.frame(x, y)
-    tcv = tcd.forward(tc.from_numpy(x).unsqueeze(0), tc.from_numpy(y).unsqueeze(0))
 
-    assert tcv == npv
+    x = tc.from_numpy(x).unsqueeze(0)
+    y = tc.from_numpy(y).unsqueeze(0)
+    x = tc.concatenate((x, x))
+    y = tc.concatenate((y, y))
 
+    tcv = tcd.forward(x, y)
+
+    assert tcv[0] == npv
+    assert tcv[1] == npv
