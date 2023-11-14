@@ -1,4 +1,4 @@
-from ..outer_middle_ear_filter import outer_middle_ear_filter
+from libdetectability.internal.outer_middle_ear_filter import outer_middle_ear_filter
 
 def test_outer_middle_ear_filter():
     import matplotlib.pyplot as plt

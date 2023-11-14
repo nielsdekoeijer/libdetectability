@@ -1,4 +1,4 @@
-from ..threshold_in_quiet import threshold_in_quiet
+from libdetectability.internal.threshold_in_quiet import threshold_in_quiet
 
 def test_threshold_in_quiet():
     import matplotlib.pyplot as plt

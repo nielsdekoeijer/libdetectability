@@ -1,4 +1,4 @@
-from ..gammatone_filterbank import gammatone_filterbank
+from libdetectability.internal.gammatone_filterbank import gammatone_filterbank
 
 def test_gammatone_filterbank():
     import matplotlib.pyplot as plt

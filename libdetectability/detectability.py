@@ -1,7 +1,9 @@
 import numpy as np
 import scipy as sp
-from .gammatone_filterbank import gammatone_filterbank
-from .outer_middle_ear_filter import outer_middle_ear_filter
+import torch as tc
+
+from .internal.gammatone_filterbank import gammatone_filterbank
+from .internal.outer_middle_ear_filter import outer_middle_ear_filter
 
 class Detectability:
     def __init__(self, frame_size=2048, sampling_rate=48000, taps=32, dbspl=94.0, spl=1.0, relax_threshold=False):
@@ -23,12 +25,12 @@ class Detectability:
         calibration_freq = np.fft.rfftfreq(frame_size, d=1.0/sampling_rate)[calibration_bin]
         A52 = np.power(10.0, (52.0 - (self.dbspl - 20 * np.log10(spl))) / 20.0)
         A70 = np.power(10.0, (70.0 - (self.dbspl - 20 * np.log10(spl))) / 20.0)
-        x = A70 * np.sin(2 * np.pi * calibration_freq * np.arange(self.frame_size) / self.sampling_rate)
         e = A52 * np.sin(2 * np.pi * calibration_freq * np.arange(self.frame_size) / self.sampling_rate)
-        x = self._spectrum(x)
+        x = A70 * np.sin(2 * np.pi * calibration_freq * np.arange(self.frame_size) / self.sampling_rate)
         e = self._spectrum(e)
-        x = self._masker_power_array(x)
+        x = self._spectrum(x)
         e = self._masker_power_array(e)
+        x = self._masker_power_array(x)
 
         calibration_ca = lambda cs: cs * self.leff * np.sum([self.g[i][calibration_bin] for i in range(self.taps)])
         calibration_bisection = lambda cs: 1.0 - self._detectability(e, x, cs, calibration_ca(cs))
@@ -47,19 +49,17 @@ class Detectability:
     def _detectability(self, s, m, cs, ca):
         return cs * self.leff * (s / (m + ca)).sum()
 
-    def frame(self, x, y):
+    def frame(self, reference, test):
         assert x.size == self.frame_size and y.size == self.frame_size, f"input frame size different the specified upon construction"
         assert len(x.shape) == 1 and len(y.shape) == 1, f"only support for one-dimensional inputs"
 
-        e = self._spectrum(y - x)
-        x = self._spectrum(x)
-        s = self._masker_power_array(e)
-        m = self._masker_power_array(x)
+        e = self._spectrum(test - reference)
+        x = self._spectrum(reference)
+        e = self._masker_power_array(e)
+        x = self._masker_power_array(x)
 
-        return self._detectability(s, m, self.cs, self.ca)
+        return self._detectability(e, x, self.cs, self.ca)
 
-    def mean(self, x, y, overlap_size=None):
-        if overlap_size == None:
-            overlap_size = self.frame_size // 2
-        assert (x.size() - self.frame_size) % overlap_size == 0, \
-            "overlap_size must be such that input sequences fit exactly within resulting frames"
+class DetectabilityLoss(tc.nn.Module):
+    def __init__():
+        None
