@@ -50,8 +50,8 @@ class Detectability:
         return cs * self.leff * (s / (m + ca)).sum()
 
     def frame(self, reference, test):
-        assert x.size == self.frame_size and y.size == self.frame_size, f"input frame size different the specified upon construction"
-        assert len(x.shape) == 1 and len(y.shape) == 1, f"only support for one-dimensional inputs"
+        assert reference.size == self.frame_size and test.size == self.frame_size, f"input frame size different the specified upon construction"
+        assert len(reference.shape) == 1 and len(test.shape) == 1, f"only support for one-dimensional inputs"
 
         e = self._spectrum(test - reference)
         x = self._spectrum(reference)
@@ -60,6 +60,48 @@ class Detectability:
 
         return self._detectability(e, x, self.cs, self.ca)
 
+    def gain(self, reference):
+        assert reference.size == self.frame_size, f"input frame size different the specified upon construction"
+        assert len(reference.shape) == 1, f"only support for one-dimensional inputs"
+
+        x = self._spectrum(reference)
+
+
 class DetectabilityLoss(tc.nn.Module):
-    def __init__():
-        None
+    def __init__(self, frame_size=2048, sampling_rate=48000, taps=32, dbspl=94.0, spl=1.0, relax_threshold=False):
+        self.detectability = Detectability(frame_size=frame_size, sampling_rate=sampling_rate, taps=taps, dbspl=dbspl, \
+                spl=spl, relax_threshold=relax_threshold)
+        self.ca = self.detectability.ca
+        self.cs = self.detectability.cs
+        self.frame_size = self.detectability.frame_size
+        self.taps = self.detectability.taps
+        self.leff = self.detectability.leff
+        self.g = tc.from_numpy(self.detectability.g)
+        self.h = tc.from_numpy(self.detectability.h)
+
+    def _spectrum(self, a):
+        return tc.pow(tc.abs(tc.fft.rfft(a)), 2.0)
+
+    def _masker_power(self, a, i):
+        return tc.sum(self.h * self.g[i] * a)
+
+    def _masker_power_array(self, a):
+        return tc.tensor([self._masker_power(a, i) for i in range(self.taps)])
+
+    def _detectability(self, s, m, cs, ca):
+        return cs * self.leff * (s / (m + ca)).sum()
+
+    def to(device):
+        self.g.to(device)
+        self.h.to(device)
+
+    def forward(self, reference, test):
+        assert len(reference.shape) == 2 and len(test.shape) == 2, f"only support for batched one-dimensional inputs"
+        assert reference.shape[1] == self.frame_size and test.shape[1] == self.frame_size, f"input frame size different the specified upon construction"
+
+        e = self._spectrum(test - reference)
+        x = self._spectrum(reference)
+        e = self._masker_power_array(e)
+        x = self._masker_power_array(x)
+
+        return self._detectability(e, x, self.cs, self.ca)
