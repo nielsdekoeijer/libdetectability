@@ -1,7 +1,8 @@
 import numpy as np
 import scipy as sp
 from scipy.special import factorial, factorial2
-from . import *
+from .centre_frequency import centre_frequency
+from .freq_as_erb import freq_as_erb
 
 def gammatone_filterbank(taps, frame_size, sampling_rate):
     # magic number see paper
@@ -17,7 +18,7 @@ def gammatone_filterbank(taps, frame_size, sampling_rate):
 
     return np.array([
             [
-                np.power(1.0 + ((f - f0[i]) / (k * erb0[i])), -2.0)
+                np.power(1.0 + np.power((f - f0[i]) / (k * erb0[i]), 2.0), -2.0)
                 for f in np.fft.rfftfreq(frame_size, d=(1.0 / sampling_rate))
             ]
             for i in range(taps)
