@@ -9,4 +9,4 @@ It currently assumes you always batch your inputs along the first dimension.
 E.g. you use it as follows:
 * `criterion = DetectabilityLoss()`
 * `criterion(reference, test)`
-Note that the `DetectabilityLoss` does perceptual analysis on the first input argument! Hence the order is very important.
+* Note that the `DetectabilityLoss` does perceptual analysis on the first input argument! Hence the order is very important.
