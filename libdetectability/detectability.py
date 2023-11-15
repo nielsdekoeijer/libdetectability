@@ -6,7 +6,7 @@ from .internal.gammatone_filterbank import gammatone_filterbank
 from .internal.outer_middle_ear_filter import outer_middle_ear_filter
 
 class Detectability:
-    def __init__(self, frame_size=2048, sampling_rate=48000, taps=32, dbspl=94.0, spl=1.0, relax_threshold=False):
+    def __init__(self, frame_size=2048, sampling_rate=48000, taps=32, dbspl=94.0, spl=1.0, relax_threshold=False, norm="backward"):
         assert frame_size % 2 == 0, "only evenly-sized frames are supported"
         self.frame_size = frame_size
         self.freq_size = frame_size // 2 + 1
@@ -14,6 +14,7 @@ class Detectability:
         self.dbspl = dbspl
         self.spl = spl
         self.sampling_rate = sampling_rate
+        self.norm = norm
 
         # prealloc
         self.g = np.power(np.abs(gammatone_filterbank(self.taps, self.frame_size, self.sampling_rate)), 2.0)
@@ -40,7 +41,7 @@ class Detectability:
         self.ca = calibration_ca(self.cs)
 
     def _spectrum(self, a):
-        return np.power(np.abs(np.fft.rfft(a)), 2.0)
+        return np.power(np.abs(np.fft.rfft(a, norm=self.norm)), 2.0)
 
     def _masker_power(self, a, i):
         return np.sum(self.h * self.g[i] * a)
@@ -74,19 +75,20 @@ class Detectability:
         return np.sqrt(G.sum(axis=0))
 
 class DetectabilityLoss(tc.nn.Module):
-    def __init__(self, frame_size=2048, sampling_rate=48000, taps=32, dbspl=94.0, spl=1.0, relax_threshold=False):
+    def __init__(self, frame_size=2048, sampling_rate=48000, taps=32, dbspl=94.0, spl=1.0, relax_threshold=False, norm = "backward"):
         super(DetectabilityLoss, self).__init__()
         self.detectability = Detectability(frame_size=frame_size, sampling_rate=sampling_rate, taps=taps, dbspl=dbspl, \
-                spl=spl, relax_threshold=relax_threshold)
+                spl=spl, relax_threshold=relax_threshold, norm=norm)
         self.ca = self.detectability.ca
         self.cs = self.detectability.cs
         self.frame_size = self.detectability.frame_size
         self.taps = self.detectability.taps
         self.leff = self.detectability.leff
+        self.norm = self.detectability.norm
         self.G = tc.from_numpy(self.detectability.h) * tc.from_numpy(self.detectability.g).unsqueeze(0)
 
     def _spectrum(self, a):
-        return tc.pow(tc.abs(tc.fft.rfft(a, axis=1)), 2.0)
+        return tc.pow(tc.abs(tc.fft.rfft(a, axis=1, norm=self.norm)), 2.0)
 
     def _masker_power_array(self, a):
         return tc.sum(a.unsqueeze(1) * self.G, axis=2)

@@ -4,8 +4,8 @@ import torch as tc
 import pytest
 
 def test_cost():
-    npd = Detectability()
-    tcd = DetectabilityLoss()
+    npd = Detectability(norm="ortho")
+    tcd = DetectabilityLoss(norm="ortho")
 
     x = np.sin(2 * np.pi * 5.0 * np.arange(2048) / 2048)
     y = np.sin(2 * np.pi * np.arange(2048) / 2048)
@@ -19,18 +19,18 @@ def test_cost():
 
     tcv = tcd.frame(x, y)
 
-    assert tcv[0] == npv
-    assert tcv[1] == npv
+    assert tcv[0] == pytest.approx(npv)
+    assert tcv[1] == pytest.approx(npv)
 
 def test_gain():
-    npd = Detectability()
+    npd = Detectability(norm="ortho")
 
     x = np.sin(2 * np.pi * 5.0 * np.arange(2048) / 2048)
     y = np.sin(2 * np.pi * np.arange(2048) / 2048)
     npv = npd.frame(x, y)
     g = npd.gain(x)
 
-    assert npv == pytest.approx(np.power(np.linalg.norm(g * np.fft.rfft(x - y)), 2.0))
+    assert npv == pytest.approx(np.power(np.linalg.norm(g * np.fft.rfft(x - y, norm="ortho")), 2.0))
 
 def test_old():
     import pydetectability as pd
