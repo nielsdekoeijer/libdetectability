@@ -1,6 +1,7 @@
 from .detectability import Detectability, DetectabilityLoss
 import numpy as np
 import torch as tc
+import pytest
 
 def test_cost():
     npd = Detectability()
@@ -16,7 +17,17 @@ def test_cost():
     x = tc.concatenate((x, x))
     y = tc.concatenate((y, y))
 
-    tcv = tcd.forward(x, y)
+    tcv = tcd.frame(x, y)
 
     assert tcv[0] == npv
     assert tcv[1] == npv
+
+def test_gain():
+    npd = Detectability()
+
+    x = np.sin(2 * np.pi * 5.0 * np.arange(2048) / 2048)
+    y = np.sin(2 * np.pi * np.arange(2048) / 2048)
+    npv = npd.frame(x, y)
+    g = npd.gain(x)
+
+    assert npv == pytest.approx(np.power(np.linalg.norm(g * np.fft.rfft(x - y)), 2.0))

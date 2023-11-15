@@ -23,8 +23,10 @@ class Detectability:
         # calibration
         calibration_bin = self.frame_size // 4
         calibration_freq = np.fft.rfftfreq(frame_size, d=1.0/sampling_rate)[calibration_bin]
+
         A52 = np.power(10.0, (52.0 - (self.dbspl - 20 * np.log10(spl))) / 20.0)
         A70 = np.power(10.0, (70.0 - (self.dbspl - 20 * np.log10(spl))) / 20.0)
+
         e = A52 * np.sin(2 * np.pi * calibration_freq * np.arange(self.frame_size) / self.sampling_rate)
         x = A70 * np.sin(2 * np.pi * calibration_freq * np.arange(self.frame_size) / self.sampling_rate)
         e = self._spectrum(e)
@@ -65,10 +67,30 @@ class Detectability:
         assert len(reference.shape) == 1, f"only support for one-dimensional inputs"
 
         x = self._spectrum(reference)
-
+        x = self._masker_power_array(x)
+        numer = self.cs * self.leff * self.h * self.g
+        denom = (x + self.ca).reshape(-1, 1)
+        G = numer / denom
+        return np.sqrt(G.sum(axis=0))
 
 class DetectabilityLoss(tc.nn.Module):
+    """
+    A custom loss function class implementing detectability loss for auditory signals.
+
+    This class calculates a specialized loss based on the detectability of differences
+    between reference and test auditory signals.
+
+    Attributes:
+        detectability (Detectability): An instance of the Detectability class for signal processing.
+        ca (float): Critical masking amplitude.
+        cs (float): Critical masking scale.
+        frame_size (int): The size of each frame of audio data.
+        taps (int): Number of filter taps.
+        leff (float): Effective length.
+        G (torch.Tensor): Tensor representing combined filter coefficients.
+    """
     def __init__(self, frame_size=2048, sampling_rate=48000, taps=32, dbspl=94.0, spl=1.0, relax_threshold=False):
+        super(DetectabilityLoss, self).__init__()
         self.detectability = Detectability(frame_size=frame_size, sampling_rate=sampling_rate, taps=taps, dbspl=dbspl, \
                 spl=spl, relax_threshold=relax_threshold)
         self.ca = self.detectability.ca
@@ -87,11 +109,11 @@ class DetectabilityLoss(tc.nn.Module):
     def _detectability(self, s, m, cs, ca):
         return cs * self.leff * (s / (m + ca)).sum(axis=1)
 
-    def to(device):
-        self.g.to(device)
-        self.h.to(device)
+    def to(self, device):
+        super().to(device)
+        self.G.to(device)
 
-    def forward(self, reference, test):
+    def frame(self, reference, test):
         assert len(reference.shape) == 2 and len(test.shape) == 2, f"only support for batched one-dimensional inputs"
         assert reference.shape[1] == self.frame_size and test.shape[1] == self.frame_size, f"input frame size different the specified upon construction"
 
@@ -101,3 +123,7 @@ class DetectabilityLoss(tc.nn.Module):
         x = self._masker_power_array(x)
 
         return self._detectability(e, x, self.cs, self.ca)
+
+    def forward(self, reference, test):
+        batches = self.frame(reference, test)
+        return batches.mean()
