@@ -98,7 +98,8 @@ class DetectabilityLoss(tc.nn.Module):
 
     def to(self, device):
         super().to(device)
-        self.G.to(device)
+        self.G = self.G.to(device)
+        return self
 
     def frame(self, reference, test):
         assert len(reference.shape) == 2 and len(test.shape) == 2, f"only support for batched one-dimensional inputs"

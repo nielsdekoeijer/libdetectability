@@ -1,1 +1,1 @@
-from .detectability import Detectability
+from .detectability import Detectability, DetectabilityLoss
