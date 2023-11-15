@@ -6,7 +6,7 @@ from .internal.gammatone_filterbank import gammatone_filterbank
 from .internal.outer_middle_ear_filter import outer_middle_ear_filter
 
 class Detectability:
-    def __init__(self, frame_size=2048, sampling_rate=48000, taps=32, dbspl=94.0, spl=1.0, relax_threshold=False, norm="backward"):
+    def __init__(self, frame_size=2048, sampling_rate=48000, taps=64, dbspl=94.0, spl=1.0, relax_threshold=False, norm="backward"):
         assert frame_size % 2 == 0, "only evenly-sized frames are supported"
         self.frame_size = frame_size
         self.freq_size = frame_size // 2 + 1

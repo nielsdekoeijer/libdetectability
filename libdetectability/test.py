@@ -32,7 +32,7 @@ def test_gain():
 
     assert npv == pytest.approx(np.power(np.linalg.norm(g * np.fft.rfft(x - y, norm="ortho")), 2.0))
 
-def test_old():
+def test_cost_old():
     import pydetectability as pd
     new = Detectability()
     old = pd.par_model(48000.0, 2048, pd.signal_pressure_mapping(1.0, 94.0))
@@ -42,3 +42,19 @@ def test_old():
 
     print(old.detectability_gain(x, x - y), 2.0)
     print(new.frame(x, y))
+    print("end")
+
+def test_gain_old():
+    x = np.sin(2 * np.pi * 5.0 * np.arange(2048) / 2048)
+    y = np.sin(2 * np.pi * np.arange(2048) / 2048)
+
+    new = Detectability()
+    g = new.gain(x)
+    print(pytest.approx(np.power(np.linalg.norm(g * np.fft.rfft(x - y)), 2.0)))
+
+    import pydetectability as pd
+    old = pd.par_model(48000, 2048, pd.signal_pressure_mapping(1.0, 94.0))
+    g = old.gain(x)
+    print(pytest.approx(np.power(np.linalg.norm(g * np.fft.rfft(x - y)), 2.0)))
+    print("end")
+    
