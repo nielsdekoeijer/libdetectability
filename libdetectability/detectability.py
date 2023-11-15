@@ -74,21 +74,6 @@ class Detectability:
         return np.sqrt(G.sum(axis=0))
 
 class DetectabilityLoss(tc.nn.Module):
-    """
-    A custom loss function class implementing detectability loss for auditory signals.
-
-    This class calculates a specialized loss based on the detectability of differences
-    between reference and test auditory signals.
-
-    Attributes:
-        detectability (Detectability): An instance of the Detectability class for signal processing.
-        ca (float): Critical masking amplitude.
-        cs (float): Critical masking scale.
-        frame_size (int): The size of each frame of audio data.
-        taps (int): Number of filter taps.
-        leff (float): Effective length.
-        G (torch.Tensor): Tensor representing combined filter coefficients.
-    """
     def __init__(self, frame_size=2048, sampling_rate=48000, taps=32, dbspl=94.0, spl=1.0, relax_threshold=False):
         super(DetectabilityLoss, self).__init__()
         self.detectability = Detectability(frame_size=frame_size, sampling_rate=sampling_rate, taps=taps, dbspl=dbspl, \
