@@ -75,7 +75,7 @@ class Detectability:
         return np.sqrt(G.sum(axis=0))
 
 class DetectabilityLoss(tc.nn.Module):
-    def __init__(self, frame_size=2048, sampling_rate=48000, taps=32, dbspl=94.0, spl=1.0, relax_threshold=True, norm = "backward", reduction="meanlog"):
+    def __init__(self, frame_size=2048, sampling_rate=48000, taps=32, dbspl=94.0, spl=1.0, relax_threshold=True, norm = "backward", reduction="meanlog", eps=1e-8):
         super(DetectabilityLoss, self).__init__()
         self.detectability = Detectability(frame_size=frame_size, sampling_rate=sampling_rate, taps=taps, dbspl=dbspl, \
                 spl=spl, relax_threshold=relax_threshold, norm=norm)
@@ -87,6 +87,7 @@ class DetectabilityLoss(tc.nn.Module):
         self.norm = self.detectability.norm
         self.G = tc.from_numpy(self.detectability.h) * tc.from_numpy(self.detectability.g).unsqueeze(0)
         self.reduction = reduction
+        self.eps = eps
 
     def _spectrum(self, a):
         return tc.pow(tc.abs(tc.fft.rfft(a, axis=1, norm=self.norm)), 2.0)
@@ -118,5 +119,5 @@ class DetectabilityLoss(tc.nn.Module):
         if self.reduction == "mean":
             return batches.mean()
         if self.reduction == "meanlog":
-            batches = tc.log(batches)
+            batches = tc.log(batches + self.eps)
             return batches.mean()
