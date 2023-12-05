@@ -10,7 +10,7 @@ E.g. you use it as follows:
 * `criterion = DetectabilityLoss()`
 * `criterion(reference, test)`
 * Note that the `DetectabilityLoss` does perceptual analysis on the **first** input argument!
-  * Hence the order of arguments is very important: one should pass the reference as the first argument (no gradient, typically playing the role of a "label") and the changed test signal as the second argument (gradient, model output)!
+  * Hence the order of arguments is very important: one should pass the `reference` as the first argument (no gradient, typically playing the role of a "label") and the changed `test` signal as the second argument (gradient, model output)!
 ## Contributors:
 - Niels Evert Marinus de Koeijer
 - Tudor-Razvan Tatar
