@@ -10,3 +10,7 @@ E.g. you use it as follows:
 * `criterion = DetectabilityLoss()`
 * `criterion(reference, test)`
 * Note that the `DetectabilityLoss` does perceptual analysis on the first input argument! Hence the order is very important.
+
+## Contributors:
+- Niels Evert Marinus de Koeijer
+- Tudor-Razvan Tatar
