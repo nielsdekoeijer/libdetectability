@@ -18,6 +18,8 @@ def test_cost():
     y = tc.concatenate((y, y))
 
     tcv = tcd.frame(x, y)
+    print(tcv)
+    print(npv)
 
     assert tcv[0] == pytest.approx(npv)
     assert tcv[1] == pytest.approx(npv)
