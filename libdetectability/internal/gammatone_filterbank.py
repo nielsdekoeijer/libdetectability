@@ -13,8 +13,15 @@ def gammatone_filterbank(taps, frame_size, sampling_rate):
     f2 = sp.special.factorial2(2 * 4 - 3)
     k = (sq * f1) / (np.pi * f2)
 
-    # centre frequencies + erbs
+    # centre frequencies
+    # 
+    #   "The centre frequencies of the filters are uniformly spaced on an ERB-rate scale and follow the bandwidths as specified by the ERB scale [31]."
+    #
+    # This leaves room for some ambiguity in my view. E.g. uniformly spaced between what frequencies?
     f0 = np.array([centre_frequency(tap) for tap in np.linspace(freq_as_erbs(50), freq_as_erbs((sampling_rate // 2) * 0.9), taps)])
+
+    # ERB = Equivalent Rectangular Band
+    # Essentially, the bandwidth of the filter depends on the frequency
     erb0 = np.array([freq_as_erb(freq) for freq in f0])
     assert np.max(f0) < sampling_rate / 2, f"Specified taps size yields frequencies above nyquist: {np.max(f0)} > {sampling_rate / 2}"
 
