@@ -190,6 +190,8 @@ class DetectabilityLoss(tc.nn.Module):
     def to(self, device):
         super().to(device)
         self.G = self.G.to(device)
+        self.h = self.h.to(device)
+        self.g = self.g.to(device)
         return self
 
     def frame(self, reference, test):
