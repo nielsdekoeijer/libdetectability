@@ -22,6 +22,25 @@ def test_torch_cost():
     assert tcv[0] == pytest.approx(npv)
     assert tcv[1] == pytest.approx(npv)
 
+def test_torch_normalized_cost():
+    npd = Detectability(norm="ortho", normalize_gain=True)
+    tcd = DetectabilityLoss(norm="ortho", normalize_gain=True)
+
+    x = np.sin(2 * np.pi * 5.0 * np.arange(2048) / 2048)
+    y = np.sin(2 * np.pi * np.arange(2048) / 2048)
+
+    npv = npd.frame(x, y)
+
+    x = tc.from_numpy(x).unsqueeze(0)
+    y = tc.from_numpy(y).unsqueeze(0)
+    x = tc.concatenate((x, x))
+    y = tc.concatenate((y, y))
+
+    tcv = tcd.frame(x, y)
+
+    assert tcv[0] == pytest.approx(npv)
+    assert tcv[1] == pytest.approx(npv)
+
 def test_torch_gain():
     npd = Detectability(norm="ortho")
     tcd = DetectabilityLoss(norm="ortho")

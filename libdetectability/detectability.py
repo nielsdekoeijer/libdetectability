@@ -69,6 +69,11 @@ class Detectability:
         assert len(reference.shape) == 1 and len(test.shape) == 1, \
                 f"only support for one-dimensional inputs"
 
+        if (self.normalize_gain):
+            e = self._spectrum(test - reference)
+            gain = self.gain(reference)
+            return np.power(np.linalg.norm(gain * e, ord=2, axis=0), 2.0)
+
         e = self._spectrum(test - reference)
         x = self._spectrum(reference)
         e = self._masker_power_array(e)
@@ -140,11 +145,16 @@ class DetectabilityLoss(tc.nn.Module):
         assert len(reference.shape) == 2 and len(test.shape) == 2, f"only support for batched one-dimensional inputs"
         assert reference.shape[1] == self.frame_size and test.shape[1] == self.frame_size, f"input frame size different the specified upon construction"
 
+        if (self.normalize_gain):
+            e = self._spectrum(test - reference)
+            gain = self.gain(reference)
+            return tc.pow(tc.norm(gain * e, p='fro', dim=1), 2.0)
+
         e = self._spectrum(test - reference)
         x = self._spectrum(reference)
         e = self._masker_power_array(e)
         x = self._masker_power_array(x)
-
+        
         return self._detectability(e, x, self.cs, self.ca)
 
     def gain(self, reference):
