@@ -12,7 +12,8 @@ class Detectability:
                  taps=32, 
                  dbspl=94.0, 
                  spl=1.0, 
-                 relax_threshold=False, 
+                 relax_threshold=False,
+                 normalize_gain=False, 
                  norm="backward"):
         assert frame_size % 2 == 0, "only evenly-sized frames are supported"
         self.frame_size = frame_size
@@ -22,6 +23,7 @@ class Detectability:
         self.spl = spl
         self.sampling_rate = sampling_rate
         self.norm = norm
+        self.normalize_gain = normalize_gain
 
         # prealloc
         self.g = np.power(np.abs(gammatone_filterbank(self.taps, self.frame_size, self.sampling_rate)), 2.0)
@@ -85,7 +87,12 @@ class Detectability:
         numer = self.cs * self.leff * self.h * self.g
         denom = (x + self.ca).reshape(-1, 1)
         G = numer / denom
-        return np.sqrt(G.sum(axis=0))
+        gain = np.sqrt(G.sum(axis=0))
+
+        if (self.normalize_gain):
+            factor = np.linalg.norm(gain, ord=2, axis=0)
+            gain = gain / factor
+        return gain
 
 class DetectabilityLoss(tc.nn.Module):
     def __init__(self, 
@@ -95,6 +102,7 @@ class DetectabilityLoss(tc.nn.Module):
                  dbspl=94.0, 
                  spl=1.0, 
                  relax_threshold=False, 
+                 normalize_gain=False, 
                  norm = "backward", 
                  reduction="meanlog", 
                  eps=1e-8):
@@ -107,9 +115,12 @@ class DetectabilityLoss(tc.nn.Module):
         self.taps = self.detectability.taps
         self.leff = self.detectability.leff
         self.norm = self.detectability.norm
+        self.h = tc.from_numpy(self.detectability.h)
+        self.g = tc.from_numpy(self.detectability.g)
         self.G = tc.from_numpy(self.detectability.h) * tc.from_numpy(self.detectability.g).unsqueeze(0)
         self.reduction = reduction
         self.eps = eps
+        self.normalize_gain = normalize_gain
 
     def _spectrum(self, a):
         return tc.pow(tc.abs(tc.fft.rfft(a, axis=1, norm=self.norm)), 2.0)
@@ -136,10 +147,29 @@ class DetectabilityLoss(tc.nn.Module):
 
         return self._detectability(e, x, self.cs, self.ca)
 
+    def gain(self, reference):
+        assert len(reference.shape) == 2, f"only support for batched one-dimensional inputs"
+        assert reference.shape[1] == self.frame_size, f"input frame size different the specified upon construction"
+
+        x = self._spectrum(reference)
+        x = self._masker_power_array(x)
+        numer = (self.cs * self.leff * self.h * self.g).unsqueeze(0)
+        denom = (x + self.ca).unsqueeze(-1)
+        G = numer / denom
+        gain = G.sum(axis=1).sqrt()
+
+        if (self.normalize_gain):
+            factor = tc.norm(gain, p='fro', dim=1).unsqueeze(-1)
+            gain = gain / factor
+
+        return gain
+
     def forward(self, reference, test):
         batches = self.frame(reference, test)
+
         if self.reduction == "mean":
             return batches.mean()
+
         if self.reduction == "meanlog":
             batches = tc.log(batches + self.eps)
             return batches.mean()

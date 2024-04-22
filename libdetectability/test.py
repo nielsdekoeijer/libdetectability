@@ -3,7 +3,7 @@ import numpy as np
 import torch as tc
 import pytest
 
-def test_cost():
+def test_torch_cost():
     npd = Detectability(norm="ortho")
     tcd = DetectabilityLoss(norm="ortho")
 
@@ -18,8 +18,38 @@ def test_cost():
     y = tc.concatenate((y, y))
 
     tcv = tcd.frame(x, y)
-    print(tcv)
-    print(npv)
+
+    assert tcv[0] == pytest.approx(npv)
+    assert tcv[1] == pytest.approx(npv)
+
+def test_torch_gain():
+    npd = Detectability(norm="ortho")
+    tcd = DetectabilityLoss(norm="ortho")
+
+    x = np.sin(2 * np.pi * 5.0 * np.arange(2048) / 2048)
+
+    npv = npd.gain(x)
+
+    x = tc.from_numpy(x).unsqueeze(0)
+    x = tc.concatenate((x, x))
+
+    tcv = tcd.gain(x)
+
+    assert tcv[0] == pytest.approx(npv)
+    assert tcv[1] == pytest.approx(npv)
+
+def test_torch_normalized_gain():
+    npd = Detectability(norm="ortho", normalize_gain=True)
+    tcd = DetectabilityLoss(norm="ortho", normalize_gain=True)
+
+    x = np.sin(2 * np.pi * 5.0 * np.arange(2048) / 2048)
+
+    npv = npd.gain(x)
+
+    x = tc.from_numpy(x).unsqueeze(0)
+    x = tc.concatenate((x, x))
+
+    tcv = tcd.gain(x)
 
     assert tcv[0] == pytest.approx(npv)
     assert tcv[1] == pytest.approx(npv)
@@ -59,4 +89,3 @@ def test_gain_old():
     g = old.gain(x)
     print(pytest.approx(np.power(np.linalg.norm(g * np.fft.rfft(x - y)), 2.0)))
     print("end")
-    
