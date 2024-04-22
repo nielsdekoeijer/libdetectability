@@ -3,6 +3,7 @@ import numpy as np
 import torch as tc
 import pytest
 
+
 def test_torch_cost():
     npd = Detectability(norm="ortho")
     tcd = DetectabilityLoss(norm="ortho")
@@ -21,6 +22,7 @@ def test_torch_cost():
 
     assert tcv[0] == pytest.approx(npv)
     assert tcv[1] == pytest.approx(npv)
+
 
 def test_torch_normalized_cost():
     npd = Detectability(norm="ortho", normalize_gain=True)
@@ -41,6 +43,7 @@ def test_torch_normalized_cost():
     assert tcv[0] == pytest.approx(npv)
     assert tcv[1] == pytest.approx(npv)
 
+
 def test_torch_gain():
     npd = Detectability(norm="ortho")
     tcd = DetectabilityLoss(norm="ortho")
@@ -56,6 +59,7 @@ def test_torch_gain():
 
     assert tcv[0] == pytest.approx(npv)
     assert tcv[1] == pytest.approx(npv)
+
 
 def test_torch_normalized_gain():
     npd = Detectability(norm="ortho", normalize_gain=True)
@@ -73,6 +77,7 @@ def test_torch_normalized_gain():
     assert tcv[0] == pytest.approx(npv)
     assert tcv[1] == pytest.approx(npv)
 
+
 def test_gain():
     npd = Detectability(norm="ortho")
 
@@ -81,10 +86,14 @@ def test_gain():
     npv = npd.frame(x, y)
     g = npd.gain(x)
 
-    assert npv == pytest.approx(np.power(np.linalg.norm(g * np.fft.rfft(x - y, norm="ortho")), 2.0))
+    assert npv == pytest.approx(
+        np.power(np.linalg.norm(g * np.fft.rfft(x - y, norm="ortho")), 2.0)
+    )
+
 
 def test_cost_old():
     import pydetectability as pd
+
     new = Detectability()
     old = pd.par_model(48000.0, 2048, pd.signal_pressure_mapping(1.0, 94.0))
 
@@ -95,6 +104,7 @@ def test_cost_old():
     print(new.frame(x, y))
     print("end")
 
+
 def test_gain_old():
     x = np.sin(2 * np.pi * 5.0 * np.arange(2048) / 2048)
     y = np.sin(2 * np.pi * np.arange(2048) / 2048)
@@ -104,6 +114,7 @@ def test_gain_old():
     print(pytest.approx(np.power(np.linalg.norm(g * np.fft.rfft(x - y)), 2.0)))
 
     import pydetectability as pd
+
     old = pd.par_model(48000, 2048, pd.signal_pressure_mapping(1.0, 94.0))
     g = old.gain(x)
     print(pytest.approx(np.power(np.linalg.norm(g * np.fft.rfft(x - y)), 2.0)))
