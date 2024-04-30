@@ -20,3 +20,4 @@ That being said this implementation has been used to great effect in a variety o
 ## Contributors:
 - Niels Evert Marinus de Koeijer
 - Tudor-Razvan Tatar
+- Martin Møller
