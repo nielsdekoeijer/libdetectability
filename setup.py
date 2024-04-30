@@ -4,6 +4,6 @@ setup(
     name="libdetectability",
     version="0.4.2",
     packages=find_packages(),
-    install_requires=["pytest", "numpy", "scipy", "torch"],
+    install_requires=["pytest", "numpy", "scipy", "torch","libsegmenter"],
     test_suite="test",
 )

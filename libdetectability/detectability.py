@@ -120,6 +120,21 @@ class Detectability:
 
         return self._detectability(e, x, self.cs, self.ca)
 
+    def frame_absolute(self, reference, test):
+        assert (
+            reference.size == self.frame_size and test.size == self.frame_size
+        ), f"input frame size different the specified upon construction"
+        assert (
+            len(reference.shape) == 1 and len(test.shape) == 1
+        ), f"only support for one-dimensional inputs"
+
+        t = self._spectrum(test)
+        x = self._spectrum(reference)
+        t = self._masker_power_array(t)
+        x = self._masker_power_array(x)
+
+        return self._detectability(t, x, self.cs, self.ca)
+
     def gain(self, reference):
         assert (
             reference.size == self.frame_size
@@ -213,6 +228,21 @@ class DetectabilityLoss(tc.nn.Module):
         x = self._masker_power_array(x)
 
         return self._detectability(e, x, self.cs, self.ca)
+
+    def frame_absolute(self, reference, test):
+        assert (
+            len(reference.shape) == 2 and len(test.shape) == 2
+        ), f"only support for batched one-dimensional inputs"
+        assert (
+            reference.shape[1] == self.frame_size and test.shape[1] == self.frame_size
+        ), f"input frame size different the specified upon construction"
+
+        t = self._spectrum(test)
+        x = self._spectrum(reference)
+        t = self._masker_power_array(t)
+        x = self._masker_power_array(x)
+
+        return self._detectability(t, x, self.cs, self.ca)
 
     def gain(self, reference):
         assert (
