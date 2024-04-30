@@ -21,14 +21,14 @@ That being said this implementation has been used to great effect in a variety o
 
 ## Use
 Upon creation of the detectability class, the user can specify a number of variables or leave them at the default setting:
- - `frame_size`: (2048) the length of the audio segments in samples.
- - `sampling_rate`: (48000) the sampling rate in Hz.
- - `taps`: (32) the number of gammatone filters used to cover the frequency range 0 Hz - sampling_rate / 2.
- - `dbspl`: (94.0):
- - `spl`: (1.0):
- - `relax_threshold`: (False) flag for determining whether to remove the threshold of hearing from the detectability calculation.
- - `normalize_gain`: (False) flag for determining whether to normalize the weighting vector associated with the detectability computation to a vector of unit-length.
- - `norm`: ("backward") option for determining in which direction it is desired for the underlying fft to perform the normalization.
+ - `frame_size`: (`2048`). The length of the audio segments in samples.
+ - `sampling_rate`: (`48000`). The sampling rate in Hz.
+ - `taps`: (`32`). The number of gammatone filters used to cover the frequency range 0 Hz - sampling_rate / 2.
+ - `dbspl`: (`94.0`).
+ - `spl`: (`1.0`).
+ - `relax_threshold`: (`False`), `True`. Flag for determining whether to remove the threshold of hearing from the detectability calculation.
+ - `normalize_gain`: (`False`), `True`. Flag for determining whether to normalize the weighting vector associated with the detectability computation to a vector of unit-length.
+ - `norm`: (`"backward"`). Option for determining in which direction it is desired for the underlying fft to perform the normalization.
 
 ## Experimental feature: segmented detectability
 As an experimental feature, the detectability can now be used to evaluate the detectability long segments of audio which are divided into smaller segments through the use of the libsegmenter found [here](https://github.com/nielsdekoeijer/libsegmenter). The functionality is provided by the class `segmented_detectability` which takes the same input arguments as the regular `detectabilit` class. It will divide the reference and test signals into segments using a Hann window of the specified frame_size with 50% overlap. The computation is performed using the functions `calculate_segment_detectability_relative(reference, test)` and `calculate_segment_detectability_absolute(reference, test)`, which utilizes the `frame` and `frame_absolute` functions, respectively. The expected input dimensions are `[number_of_batch_elements, number_of_samples_in_each_element]` and the output dimensions are `[number_of_batch_elements, number_of_segments]`, i.e., the detectability is calculated for each segment independently.
