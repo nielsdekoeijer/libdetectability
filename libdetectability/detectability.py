@@ -274,3 +274,6 @@ class DetectabilityLoss(tc.nn.Module):
         if self.reduction == "meanlog":
             batches = tc.log(batches + self.eps)
             return batches.mean()
+
+        if self.reduction == None:
+            return batches
