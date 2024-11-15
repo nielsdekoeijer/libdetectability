@@ -1,1 +1,3 @@
-from .detectability import Detectability, DetectabilityLoss
+from .detectability import Detectability
+from .detectability_loss import DetectabilityLoss
+from .segmented_detectability import SegmentedDetectability
