@@ -42,7 +42,7 @@ class Detectability:
                     self.spl,
                     self.dbspl,
                     self.sampling_rate,
-                    thershold_mode=threshold_mode,
+                    threshold_mode=threshold_mode,
                 )
             ),
             2.0,
