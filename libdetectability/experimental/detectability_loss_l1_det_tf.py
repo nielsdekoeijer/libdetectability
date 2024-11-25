@@ -57,7 +57,7 @@ class DetectabilityLossL1Det(tf.Module):
             norm_factor = 1.0 / tf.sqrt(tf.cast(N, tf.float32))
         else:
             raise ValueError(f"Unsupported norm value: {self.norm}")
-        fft_a = fft_a * norm_factor
+        fft_a = fft_a * tf.cast(norm_factor, dtype=tf.complex64)
         return tf.math.pow(tf.abs(fft_a), 2.0)
 
     def _masker_power_array(self, a):
