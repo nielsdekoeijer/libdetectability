@@ -7,6 +7,7 @@ from libdetectability.detectability import Detectability
 from libdetectability.internal.gammatone_filterbank import gammatone_filterbank
 from libdetectability.internal.outer_middle_ear_filter import outer_middle_ear_filter
 
+
 class DetectabilityLossL1Det(tf.Module):
     def __init__(
         self,
@@ -67,7 +68,9 @@ class DetectabilityLossL1Det(tf.Module):
 
     def _frame(self, reference, test):
         tf.debugging.assert_equal(
-            tf.rank(reference), 2, message="Only support for batched one-dimensional inputs"
+            tf.rank(reference),
+            2,
+            message="Only support for batched one-dimensional inputs",
         )
         tf.debugging.assert_equal(
             tf.shape(reference)[1],
@@ -81,7 +84,9 @@ class DetectabilityLossL1Det(tf.Module):
 
     def _gain(self, reference):
         tf.debugging.assert_equal(
-            tf.rank(reference), 2, message="Only support for batched one-dimensional inputs"
+            tf.rank(reference),
+            2,
+            message="Only support for batched one-dimensional inputs",
         )
         tf.debugging.assert_equal(
             tf.shape(reference)[1],
@@ -98,7 +103,7 @@ class DetectabilityLossL1Det(tf.Module):
         gain = tf.sqrt(tf.reduce_sum(G, axis=1))
 
         if self.normalize_gain:
-            factor = tf.norm(gain, ord='euclidean', axis=1, keepdims=True)
+            factor = tf.norm(gain, ord="euclidean", axis=1, keepdims=True)
             gain = gain / factor
 
         return gain
@@ -113,4 +118,3 @@ class DetectabilityLossL1Det(tf.Module):
             return batches
         else:
             raise ValueError(f"Unsupported reduction: {self.reduction}")
-

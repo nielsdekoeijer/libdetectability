@@ -6,6 +6,7 @@ from libdetectability.detectability import Detectability
 from libdetectability.internal.gammatone_filterbank import gammatone_filterbank
 from libdetectability.internal.outer_middle_ear_filter import outer_middle_ear_filter
 
+
 class DetectabilityLossL1Det(torch.nn.Module):
     def __init__(
         self,

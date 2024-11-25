@@ -4,11 +4,16 @@ import torch
 import os
 
 # Import the PyTorch version of the class
-from libdetectability.experimental.detectability_loss_l1_det_torch import DetectabilityLossL1Det as TorchDetectabilityLossL1Det
-from libdetectability.experimental.detectability_loss_l1_det_tf import DetectabilityLossL1Det as TensorflowDetectabilityLossL1Det
+from libdetectability.experimental.detectability_loss_l1_det_torch import (
+    DetectabilityLossL1Det as TorchDetectabilityLossL1Det,
+)
+from libdetectability.experimental.detectability_loss_l1_det_tf import (
+    DetectabilityLossL1Det as TensorflowDetectabilityLossL1Det,
+)
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 
 def test_detectability_loss():
     # Set random seeds for reproducibility
@@ -81,6 +86,6 @@ def test_detectability_loss():
 
     assert np.allclose(output_torch, output_tf, atol=1e-5), "Outputs are not the same"
 
+
 if __name__ == "__main__":
     test_detectability_loss()
-
