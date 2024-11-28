@@ -1,5 +1,5 @@
-from .detectability import Detectability
-from .detectability_loss import DetectabilityLoss
+from libdetectability.detectability import Detectability
+from libdetectability.detectability_loss import DetectabilityLoss
 import libsegmenter
 import torch
 
