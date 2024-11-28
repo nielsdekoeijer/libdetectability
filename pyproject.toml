@@ -9,7 +9,7 @@ description = "A library for detectability calculations"
 authors = [
     {name = "Niels de Koeijer", email = "NEMK@bang-olufsen.dk"}
 ]
-license = {text = "Specify your license here"}
+license = {text = "MIT"}
 dependencies = [
     "pytest",
     "numpy",
@@ -21,9 +21,20 @@ dependencies = [
 [project.optional-dependencies]
 tensorflow = ["tensorflow>=2.0"]
 
-[tool.setuptools.packages.find]
-include = ["libdetectability"]
-
 [tool.pytest.ini_options]
 testpaths = ["test"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/libdetectability"]
 
