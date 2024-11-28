@@ -2,8 +2,8 @@ import numpy as np
 import scipy as sp
 import torch as torch
 
-from .internal.gammatone_filterbank import gammatone_filterbank
-from .internal.outer_middle_ear_filter import outer_middle_ear_filter
+from libdetectability.internal.gammatone_filterbank import gammatone_filterbank
+from libdetectability.internal.outer_middle_ear_filter import outer_middle_ear_filter
 
 
 class Detectability:
