@@ -7,7 +7,7 @@ name = "libdetectability"
 version = "0.8.1"
 description = "A library for detectability calculations"
 authors = [
-    {name = "Niels de Koeijer", email = "null"}
+    {name = "Niels de Koeijer", email = "NEMK@bang-olufsen.dk"}
 ]
 license = {text = "Specify your license here"}
 dependencies = [
